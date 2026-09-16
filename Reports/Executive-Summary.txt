@@ -1,0 +1,27 @@
+THIRD-PARTY IDENTITY COMPROMISE & ACCESS GOVERNANCE LAB
+Case ID: TPI-2026-001
+
+INCIDENT
+Third-party vendor account: jcarter_vendor
+Vendor: Apex Support Solutions
+Affected Asset: Finance-Server
+
+FINDING
+The vendor account was approved for standard application support access and was not authorized for privileged administrative access.
+
+INVESTIGATION
+Activity analysis identified a denied Finance-Server access attempt followed by successful privileged activity. The account created temp_admin and added the account to the Server-Administrators group, violating the approved vendor access profile.
+
+RISK ASSESSMENT
+Impact: 5
+Likelihood: 4
+Risk Score: 20
+Risk Rating: Critical
+
+REMEDIATION
+Unauthorized Server-Administrators access was removed.
+Least-privilege controls were restored.
+Additional MFA and privileged-access monitoring were recommended.
+
+VALIDATION
+PASS - No unauthorized privileged access remains after remediation.

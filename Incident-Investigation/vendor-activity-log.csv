@@ -1,0 +1,7 @@
+Timestamp,User,SourceIP,Action,Resource,Result,PrivilegeLevel
+2026-09-16 00:42:11,jcarter_vendor,10.20.30.45,Login,Support-Portal,Success,Standard
+2026-09-16 00:44:03,jcarter_vendor,10.20.30.45,ReadLogs,Application-Logs,Success,Read-Only
+2026-09-16 00:51:27,jcarter_vendor,10.20.30.45,AccessAttempt,Finance-Server,Denied,Standard
+2026-09-16 00:53:14,jcarter_vendor,10.20.30.45,AdminLogin,Finance-Server,Success,Privileged
+2026-09-16 00:55:42,jcarter_vendor,10.20.30.45,CreateUser,temp_admin,Success,Privileged
+2026-09-16 00:57:09,jcarter_vendor,10.20.30.45,AddToGroup,temp_admin Server-Administrators,Success,Privileged

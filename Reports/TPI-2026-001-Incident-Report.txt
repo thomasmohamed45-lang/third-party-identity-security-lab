@@ -1,0 +1,32 @@
+INCIDENT REPORT - THIRD-PARTY IDENTITY SECURITY
+
+Case ID: TPI-2026-001
+Third Party: Apex Support Solutions
+Vendor Account: jcarter_vendor
+Affected Asset: Finance-Server
+
+FINDING
+Unauthorized Third-Party Privilege Escalation
+
+INVESTIGATION SUMMARY
+Vendor account activity was reviewed against the approved access baseline.
+The account was authorized for standard application support access and was
+not approved for privileged administrative access.
+
+Investigation identified successful privileged activity involving the
+Finance-Server and Server-Administrators group, inconsistent with the
+vendor's approved access profile.
+
+RISK ASSESSMENT
+Impact: 5
+Likelihood: 4
+Risk Score: 20
+Risk Rating: Critical
+
+REMEDIATION
+Unauthorized Server-Administrators access was removed.
+Least-privilege controls were restored.
+Additional MFA and privileged-access monitoring were recommended.
+
+VALIDATION
+PASS - No unauthorized privileged access remains after remediation.

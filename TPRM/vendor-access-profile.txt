@@ -1,0 +1,11 @@
+CASE ID: TPI-2026-001
+Organization: NorthStar Financial Services (Simulated)
+Third-Party Vendor: Apex Support Solutions (Simulated)
+Vendor User: jcarter_vendor
+Business Purpose: Remote application support
+Approved Access: Support Portal and Application Logs
+Privileged/Admin Access: NOT APPROVED
+MFA Requirement: Required
+Access Expiration: 30 days
+Risk Classification: Moderate
+Incident Trigger: Suspicious privileged activity detected from vendor account

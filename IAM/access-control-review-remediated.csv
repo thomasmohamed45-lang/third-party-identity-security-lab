@@ -1,0 +1,4 @@
+"User","Group","AccessLevel","Approved","Source"
+"jcarter_vendor","Vendor-App-Support","Standard","Yes","IAM Request"
+"jcarter_vendor","Application-Logs","Read-Only","Yes","IAM Request"
+"jcarter_vendor","Server-Administrators","Removed","Remediated","Incident Response Remediation"

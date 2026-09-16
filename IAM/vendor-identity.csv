@@ -1,0 +1,2 @@
+User,AccountType,Department,Company,AccessGroup,MFA,PrivilegedAccess,AccountStatus,ExpirationDays
+jcarter_vendor,Third-Party,Application Support,Apex Support Solutions,Vendor-App-Support,Enabled,No,Active,30
