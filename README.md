@@ -1,239 +1,145 @@
-# Third-Party Identity Security \& Privileged Access Investigation Lab
+# Third-Party Identity Security & Microsoft Sentinel Detection Lab
 
+**Focus:** Security Operations (SOC) · Identity and Access Management (IAM) · Third-Party Risk Management (TPRM) · Governance, Risk & Compliance (GRC)
 
+## Project Overview
 
-## Overview
+This portfolio project combines two related, clearly separated exercises:
 
+1. **Simulated third-party privilege escalation investigation:** Analyze fictional vendor authorization and activity datasets with PowerShell, assess unauthorized administrative activity, and document remediation and validation.
+2. **Microsoft Entra ID and Sentinel monitoring lab:** Perform controlled security-group membership changes in an Azure lab tenant, investigate the resulting Entra audit events with Kusto Query Language (KQL), create a Microsoft Sentinel scheduled analytics rule, and investigate generated alerts in Microsoft Defender.
 
+The cloud exercise demonstrates a working detection-and-investigation pipeline. A successful membership change is **not**, by itself, evidence of malicious activity or a real-world compromise.
 
-This project simulates a third-party identity security incident involving a vendor account that exceeded its approved access privileges.
+## Architecture and Investigation Workflow
 
+```text
+Controlled vendor group-membership change in Microsoft Entra ID
+                      |
+                      v
+              Entra AuditLogs
+                      |
+                      v
+          Azure Log Analytics (KQL)
+                      |
+                      v
+       Microsoft Sentinel analytics rule
+                      |
+                      v
+       Alert / Microsoft Defender investigation
+                      |
+                      v
+     Access review, risk analysis, and remediation testing
+```
 
+## Part 1 — Simulated Vendor Privilege Escalation Investigation
 
-The objective was to review the vendor's authorized identity profile, analyze activity logs, identify unauthorized privilege escalation, assess the associated cyber risk, implement remediation, and validate that excessive privileged access had been removed.
+### Scenario
 
+Fictional third-party provider **Apex Support Solutions** was approved to perform standard application support on **Finance-Server**. The simulated vendor account `jcarter_vendor` was not approved for privileged administrative access.
 
+### Investigation
 
-The lab demonstrates practical skills across Identity and Access Management (IAM), Security Operations (SOC), Incident Response, Third-Party Risk Management (TPRM), and Governance, Risk, and Compliance (GRC).
+Using PowerShell and CSV-based identity/activity datasets, the investigation:
 
+- Reviewed the vendor's authorized access profile.
+- Filtered and correlated activity records.
+- Identified a denied Finance-Server access attempt and subsequent privileged activity in the simulated dataset.
+- Examined the simulated creation of `temp_admin` and its addition to `Server-Administrators`.
+- Compared observed activity with the vendor's approved permissions.
 
+### Risk Assessment
 
-## Scenario
+| Field | Assessment |
+|---|---|
+| Finding | Unauthorized third-party privilege escalation **in the simulated dataset** |
+| Affected asset | Finance-Server |
+| Third party | Apex Support Solutions (fictional) |
+| Impact | 5 / 5 |
+| Likelihood | 4 / 5 |
+| Risk score | 20 / 25 |
+| Risk rating | Critical (lab scoring model) |
 
+### Remediation and Validation
 
+The simulated investigation documented removal of unauthorized `Server-Administrators` access and validation that the excessive privileges no longer appeared in the simulated environment. Recommended preventive controls included MFA, periodic vendor access reviews, change approval, and monitoring of privileged group membership.
 
-A third-party vendor, Apex Support Solutions, was authorized to provide standard application support for the Finance-Server.
+### Simulated Investigation Evidence
 
+| Evidence | Screenshot |
+|---|---|
+| Unauthorized privileged access | [01 — Unauthorized access](Screenshots/01-unauthorized-privileged-access.png) |
+| Privileged activity investigation | [02 — Activity investigation](Screenshots/02-privileged-activity-investigation.png) |
+| Identity and activity correlation | [03 — Correlation](Screenshots/03-identity-activity-correlation.png) |
+| Policy violation | [04 — Policy violation](Screenshots/04-privilege-escalation-policy-violation.png) |
+| Risk assessment | [05 — Critical risk](Screenshots/05-critical-risk-assessment.png) |
+| Remediation validation | [06 — Validation](Screenshots/06-remediation-validation.png) |
+| Executive summary | [07 — Executive summary](Screenshots/07-executive-summary.png) |
 
+## Part 2 — Microsoft Entra ID, Log Analytics & Sentinel Detection
 
-The vendor account `jcarter_vendor` was approved for standard access and was not authorized for privileged administrative access.
+### Lab Objective
 
+Demonstrate how a SOC analyst can detect and investigate a change to a sensitive group that governs third-party access, rather than relying on manual review alone.
 
+### Environment and Tools
 
-During activity-log analysis, the account was found performing privileged administrative actions inconsistent with its approved access profile.
+- **Microsoft Entra ID:** Lab guest identity and `Finance-Server-Access` security group.
+- **Azure Log Analytics:** `AuditLogs` queries for group membership changes.
+- **Microsoft Sentinel:** Scheduled analytics rule named **Third-Party Vendor - Sensitive Group Membership Addition**.
+- **Microsoft Defender portal:** Review of generated alerts and associated event details.
 
+### Procedure and Findings
 
+**1. Establish the access scenario.** A guest identity representing a third-party vendor was associated with the `Finance-Server-Access` group in the lab. Membership was removed and re-added during controlled testing to produce observable audit events.
 
-## Investigation
+**2. Investigate Entra audit logs.** KQL queries in Log Analytics identified successful `Add member to group` and `Remove member from group` operations. Expanded event fields were used to correlate the guest identity, target group, operation, result, and timestamp.
 
+**3. Configure the Sentinel rule.** A scheduled analytics rule monitored relevant membership-addition events. The rule was enabled, validated, and configured to create incidents when matching activity was detected.
 
+**4. Confirm detection and investigate.** The lab generated three alerts visible in the Defender portal. An alert investigation showed a successful group-membership addition and corresponding user/group target resources.
 
-The investigation included:
+**5. Review access and remediation.** Membership removal was successfully performed and observed in audit logs. The guest was subsequently **re-added for detection testing**, so the final demonstrated group state should not be described as permanently remediated. In a production environment, a security analyst would confirm authorization, escalate unexplained changes, remove unauthorized access, and document the final approved state.
 
+### Detection Logic
 
+The lab used Microsoft Entra `AuditLogs` to identify membership-addition operations, with filtering/correlation for the sensitive `Finance-Server-Access` group. The following is an **illustrative investigation query**, not a verbatim export of the saved Sentinel rule:
 
-\- Reviewing the vendor's approved access profile
+```kusto
+AuditLogs
+| where OperationName == "Add member to group"
+| where Result =~ "success"
+| where tostring(TargetResources) has "Finance-Server-Access"
+| project TimeGenerated, OperationName, Result, TargetResources
+| order by TimeGenerated desc
+```
 
-\- Filtering vendor activity logs using PowerShell
+**Analyst interpretation:** This detection flags a security-relevant change for review; it does not establish malicious intent. A production rule should incorporate approved change records, identity enrichment, exception handling, and appropriate alert tuning.
 
-\- Identifying a denied Finance-Server access attempt
+### Azure/Sentinel Evidence
 
-\- Reconstructing the activity timeline
+| Stage | Published evidence |
+|---|---|
+| Entra group-addition audit event | [01 — AuditLogs group addition](Azure-Sentinel/Screenshots/01-auditlogs-group-addition.png) |
+| KQL sensitive-group investigation | [02 — Sensitive-group KQL filter](Azure-Sentinel/Screenshots/02-sensitive-group-kql-filter.png) |
+| Analytics rule validation | [03 — Sentinel rule validation](Azure-Sentinel/Screenshots/03-sentinel-rule-validation.png) |
+| Created detection rule | [04 — Detection rule created](Azure-Sentinel/Screenshots/04-detection-rule-created.png) |
+| Defender alert investigation | [05 — Defender alert investigation](Azure-Sentinel/Screenshots/05-defender-alert-investigation.png) |
 
-\- Identifying successful privileged activity
+> **Evidence note:** Screenshots are from a controlled lab. Personal identifiers and tenant details should be reviewed before public distribution. This project does not claim a real attacker or an actual production incident.
 
-\- Detecting creation of the `temp_admin` account
+## Skills Demonstrated
 
-\- Identifying addition of `temp_admin` to the `Server-Administrators` group
-
-\- Correlating observed activity with the vendor's approved access permissions
-
-
-
-The investigation determined that privileged administrative activity occurred despite the vendor having no approved privileged-access authorization.
-
-
-
-## Risk Assessment
-
-
-
-**Finding:** Unauthorized Third-Party Privilege Escalation
-
-
-
-**Affected Asset:** Finance-Server
-
-
-
-**Third Party:** Apex Support Solutions
-
-
-
-**Impact:** 5  
-
-**Likelihood:** 4  
-
-**Risk Score:** 20  
-
-**Risk Rating:** Critical
-
-
-
-The activity violated the vendor's approved access profile and introduced significant risk to a sensitive financial system.
-
-
-
-## Remediation
-
-
-
-The following remediation actions were identified and implemented within the simulated environment:
-
-
-
-\- Removed unauthorized `Server-Administrators` access
-
-\- Restored least-privilege access
-
-\- Recommended MFA for all third-party privileged access
-
-\- Recommended monitoring and alerting for vendor privileged logins and administrative group changes
-
-\- Recommended review of the vendor access approval process and documentation of corrective action
-
-
-
-## Validation
-
-
-
-Post-remediation validation confirmed:
-
-
-
-**PASS — No unauthorized privileged access remains after remediation.**
-
-
-
-This demonstrated that the identified excessive access condition was successfully removed.
-
-
-
-## Security Concepts Demonstrated
-
-
-
-\- Identity and Access Management (IAM)
-
-\- Least Privilege
-
-\- Privileged Access Management
-
-\- Third-Party/Vendor Risk Management
-
-\- Security Log Analysis
-
-\- Incident Investigation
-
-\- Access Control Review
-
-\- Risk Assessment
-
-\- Incident Remediation
-
-\- Post-Remediation Validation
-
-
-
-## Tools Used
-
-
-
-\- Windows PowerShell
-
-\- CSV-based identity and activity datasets
-
-\- PowerShell filtering and object processing
-
-\- Structured incident reporting
-
-
-
-## Project Workflow
-
-
-
-Vendor Access Review → Activity Analysis → Privilege Escalation Detection → Incident Investigation → Risk Assessment → Remediation → Validation
-
-
+- Third-party access review and least-privilege analysis
+- Identity and security-group change auditing
+- KQL investigation of Microsoft Entra audit events
+- Microsoft Sentinel analytics rule configuration and validation
+- Microsoft Defender alert triage and evidence correlation
+- Risk assessment, incident documentation, remediation testing, and post-change verification
+- Distinguishing suspicious activity requiring investigation from confirmed malicious activity
 
 ## Key Takeaway
 
+The simulated investigation demonstrates how unauthorized vendor privileges can be identified and addressed through structured access reviews. The separate cloud lab demonstrates how Microsoft Entra audit telemetry, KQL, Sentinel analytics, and Defender alerts can support continuous monitoring of sensitive third-party access changes.
 
-
-This project demonstrates how security teams can correlate third-party identity authorization data with activity logs to detect excessive privileges, investigate unauthorized administrative activity, evaluate risk, implement corrective controls, and verify remediation.
-
-
-
-
-
-## Investigation Evidence
-
-
-
-### 1. Unauthorized Privileged Access Identified
-
-![Unauthorized Privileged Access](Screenshots/01-unauthorized-privileged-access.png)
-
-
-
-### 2. Privileged Activity Investigation
-
-![Privileged Activity Investigation](Screenshots/02-privileged-activity-investigation.png)
-
-
-
-### 3. Identity and Activity Correlation
-
-![Identity and Activity Correlation](Screenshots/03-identity-activity-correlation.png)
-
-
-
-### 4. Privilege Escalation Policy Violation
-
-![Privilege Escalation Policy Violation](Screenshots/04-privilege-escalation-policy-violation.png)
-
-
-
-### 5. Critical Risk Assessment
-
-![Critical Risk Assessment](Screenshots/05-critical-risk-assessment.png)
-
-
-
-### 6. Remediation Validation
-
-![Remediation Validation](Screenshots/06-remediation-validation.png)
-
-
-
-### 7. Executive Summary
-
-![Executive Summary](Screenshots/07-executive-summary.png)
-
-
-
-
-
-
+**Project type:** Educational, controlled lab and simulated incident investigation. No production environment or real-world compromise is represented.
