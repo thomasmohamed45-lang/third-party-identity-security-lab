@@ -1,0 +1,1 @@
+Selected screenshots from a simulated third-party access monitoring lab. Browser address bars and unrelated second monitor cropped. Review screenshots for identifiers before public upload. Entra membership-change detection does not by itself establish malicious activity.
